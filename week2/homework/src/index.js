@@ -22,6 +22,10 @@ else {
       addItem(item);
       break;
 
+    case 'remove':
+      removeItem(item);
+      break;
+
     default:
       console.error('Unknow command:' + args[0] + '. Type "node . help" for info.');
       break;
@@ -31,7 +35,8 @@ else {
 console.log(args);
 
 function showHelp() {
-  fs.readFile(__dirname +'/help.txt', 'utf-8', function(error, data) {
+  const newLocal = __dirname + '/help.txt';
+  fs.readFile(newLocal, 'utf-8', function(error, data) {
     if (error == null) {
       console.log(data);
     }
@@ -52,7 +57,7 @@ function showList() {
       }
       console.log(items);
     }
-    else if (error.code == 'ENOENT') {
+    else if (error.code === 'ENOENT') {
       console.log('The to do list is empty');
     }
     else {
@@ -62,5 +67,17 @@ function showList() {
 }
 
 function addItem(item) {
-  fs.appendFile(__dirname + '/todo.txt', item + '\n');
-}
+  fs.appendFile(__dirname + '/todo.txt', item, function(err) {
+    if (err) {
+      throw err;
+    }
+  });
+};
+
+function removeItem(item) {
+  fs.appendFile(__dirname + '/todo.txt', item, function(err) {
+    if (err) {
+      throw err;
+    }
+  });
+};
