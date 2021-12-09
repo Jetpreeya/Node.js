@@ -1,7 +1,7 @@
 'use strict';
 
 const fs   = require('fs');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 
 const DEFAULT_ENCODING = 'utf8';
 
