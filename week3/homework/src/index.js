@@ -14,6 +14,11 @@ const writeFile = promisify(_writeFile);
 
 const app = Express();
 app.use(Express.json());
+app.use((request, response) => {
+   response.json({ message: 'Hey! This is your server response!' }); 
+});
+
+module.exports = app;
 
 const TODO_FILE = 'todo.json';
 
@@ -30,10 +35,10 @@ function writeTodos(todos) {
 
 //Read all todos
 app.get('/todos', async (_req, res) => {
-    const todos = await readTodos();
     res.json(todos);
-
+    response.json({ message: 'Hey! This is your todos!' }); 
 });
+
 
 //Read a todo by ID
 app.get('/todos/:id', async (req, res) => {
@@ -88,6 +93,10 @@ app.patch('/todos/:id', async (req, res) => {
     res.json(todoItem);
 });
 
+
+
+
+module.exports = app;
 app.listen(3000, () => {
     console.info('Listening on http://localhost:3000');
 }); 
