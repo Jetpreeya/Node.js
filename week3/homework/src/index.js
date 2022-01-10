@@ -1,102 +1,99 @@
 'use strict';
 
-// TODO: Write the homework code in this file
+const express = require('express')
+const app = express()
+let { people} = require('./data')
 
-const Express = require('express');
-const uuid    = require('uuid');
+// static assets
+app.use(express.static('./methods-public'))
+// parse form data
+app.use(express.urlencoded({ extended: false }))
+// parse json
+app.use(express.json())
 
+app.get('/todos/people', (req, res) => {
+  res.status(200).json({ success: true, data: people })
+})
 
-const { readFile: _readFile, writeFile:_writeFile, write} = require('fs');
-const { promisify} = require('util');
+app.post('/todos/people', (req, res) => {
+  const { name } = req.body
+  if (!name) {
+    return res
+      .status(400)
+      .json({ success: false, msg: 'please provide name value' })
+  }
+  res.status(200).json({ success: true, person: name })
+})
 
-const readFile = promisify(_readFile);
-const writeFile = promisify(_writeFile);
+app.post('/todos/postman/people', (req, res) => {
+  const { id , name } = req.body
+  if (!name) {
+    return res
+      .status(400)
+      .json({ success: false, msg: 'please provide name value' })
+  }
+  res.status(200).json({ success: true, data: [...people, id , name] })
+})
 
-const app = Express();
-app.use(Express.json());
-app.use((request, response) => {
-   response.json({ message: 'Hey! This is your server response!' }); 
+app.post('/login', (req, res) => {
+  const { name } = req.body
+  if (name) {
+    return res.status(200).send(`Welcome ${name}`)
+  }
+
+  res.status(401).send('Please Provide Credentials')
+})
+
+app.get('/todos/people/:id', (req, res) => {
+  const peopleID  = res.send(req.params)
+
+  const singlePeople = people.find(
+    (people) => {
+          return people.id === Number(peopleID);
+      }
+  )
+  if (!singlePeople) {
+    return res.status(404).send('People Does Not Exist')
+  }
+
+  return res.json(singlePeople)
 });
 
-module.exports = app;
+app.put('/todos/people/:id', (req, res) => {
+  const { id } = req.params
+  const { name } = req.body
 
-const TODO_FILE = 'todo.json';
+  const person = people.find((person) => person.id === Number(id))
 
-function readTodos() {
-    return readFile(TODO_FILE,'utf8').then(
-        JSON.parse,
-        () => []
-    );
-}
+  if (!person) {
+    return res
+      .status(404)
+      .json({ success: false, msg: `no person with id ${id}` })
+  }
+  const newPeople = people.map((person) => {
+    if (person.id === Number(id)) {
+      person.name = name
+    }
+    return person
+  })
+  res.status(200).json({ success: true, data: newPeople })
+})
 
-function writeTodos(todos) {
-    return writeFile(TODO_FILE, JSON.stringify(todos, null));
-}
+app.delete('/todos/people/:id', (req, res) => {
+  const person = people.find((person) => person.id === Number(req.params.id))
+  if (!person) {
+    return res
+      .status(404)
+      .json({ success: false, msg: `no person with id ${req.params.id}` })
+  }
+  const newPeople = people.filter(
+    (person) => person.id !== Number(req.params.id)
+  )
+  return res.status(200).json({ success: true, data: newPeople })
 
-//Read all todos
-app.get('/todos', async (_req, res) => {
-    res.json(todos);
-    response.json({ message: 'Hey! This is your todos!' }); 
-});
-
-
-//Read a todo by ID
-app.get('/todos/:id', async (req, res) => {
-    const id = req.params.id;
-    readTodos()
-        .then(todos => {
-            const filtered = todos.filter(todo => todo.id == id)
-            console.log(filtered);
-            if (filtered.length == 0) return res.sendStatus(404);
-            res.json(filtered);
-            res.end();
-        });
-});
-
-//Create a todo
-app.post('/todos', async (req, res) => {
-    const newTodo = req.body;
-    newTodo.id = uuid(); 
-    const todo = await readTodos();
-    await writeTodos(todo);
-
-    todo.push(newTodo);
-
-    await writeTodos(todo);
-
-    res.json(todo);
-});
-
-//Delete a todo
-app.delete('/todos', async (req, res) => {
-    const empty = [];
-    await writeTodos(empty);
-    const todos = await readTodos();
-    res.json(todos);
-});
-
-//PatchTodo
-app.patch('/todos/:id', async (req, res) => {
-    let todos = await readTodos();
-    let foundItem = false;
-    let todoItem;
-
-    todos.forEach(function (item) {
-        if (item.id === req.params.id) {
-            item.done = true;
-            foundItem = true;
-            todoItem = item;
-        }
-    });
-    if (foundItem != true) return res.sendStatus(404);
-    await writeTodos(todos);
-    res.json(todoItem);
-});
+})
 
 
-
-
-module.exports = app;
-app.listen(3000, () => {
-    console.info('Listening on http://localhost:3000');
-}); 
+app.listen(4000, () => {
+  console.log('Server is listening on port 4000....')
+})
