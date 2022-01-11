@@ -13,6 +13,7 @@ app.get('/todos/people', (req, res) => {
   res.status(200).json({ success: true, data: people })
 })
 
+//To get all the information
 app.post('/todos/people', (req, res) => {
   const { name } = req.body
   if (!name) {
@@ -23,6 +24,7 @@ app.post('/todos/people', (req, res) => {
   res.status(200).json({ success: true, person: name })
 })
 
+//Post new name and Id from postman
 app.post('/todos/postman/people', (req, res) => {
   const { id , name } = req.body
   if (!name) {
